@@ -87,7 +87,7 @@ defmodule GoogleIAP do
     url = "/#{package_name}/purchases/subscriptions/#{subscription_id}/tokens/#{token}"
     case action do
       "get" -> url
-      _default -> url <> action
+      _default -> url <> ":" <> action
     end
   end
 end
