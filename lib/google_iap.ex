@@ -41,7 +41,7 @@ defmodule GoogleIAP do
                                 cancelReason: (if (response.body["cancelReason"] == 0), do: :user, else: :system),
                                 userCancellationTime: (if (response.body["cancelReason"] == 0), do: DateTime.from_unix!(response.body["userCancellationTimeMillis"], :microsecond), else: nil)
                               }}
-      {:error, error} -> error.reason
+      {:error, error} -> {:error, error.reason}
     end
   end
 
@@ -57,7 +57,7 @@ defmodule GoogleIAP do
   def cancel_subscription(package_name, subscription_id, token) do
     case subscription_url("cancel", package_name, subscription_id, token) |> Client.post("") do
       {:ok, _} -> :ok
-      {:error, error} -> error.reason
+      {:error, error} -> {:error, error.reason}
     end
   end
 
@@ -82,7 +82,7 @@ defmodule GoogleIAP do
 
     case subscription_url("defer", package_name, subscription_id, token) |> Client.post(body, [{"content-type", "application/json"}]) do
       {:ok, response} -> {:ok, DateTime.from_unix!(response.body["newExpiryTimeMillis"])}
-      {:error, error} -> error.reason
+      {:error, error} -> {:error, error.reason}
     end
   end
 
@@ -98,7 +98,7 @@ defmodule GoogleIAP do
   def refund_subscription(package_name, subscription_id, token) do
     case subscription_url("refund", package_name, subscription_id, token) |> Client.post("") do
       {:ok, _} -> :ok
-      {:error, error} -> error.reason
+      {:error, error} -> {:error, error.reason}
     end
   end
 
@@ -114,7 +114,7 @@ defmodule GoogleIAP do
   def revoke_subscription(package_name, subscription_id, token) do
     case subscription_url("revoke", package_name, subscription_id, token) |> Client.post("") do
       {:ok, _} -> :ok
-      {:error, error} -> error.reason
+      {:error, error} -> {:error, error.reason}
     end
   end
 
