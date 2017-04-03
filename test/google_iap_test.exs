@@ -1,5 +1,5 @@
 defmodule GoogleIAPTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
   
   import :meck
   alias GoogleIAP
@@ -11,10 +11,23 @@ defmodule GoogleIAPTest do
   end
 
   test "get_subscription/3" do
+    subscription = %GoogleIAP.Subscription{
+      startTime: DateTime.from_unix!(1490964684, :microsecond),
+      expiryTime: DateTime.from_unix!(1490964684, :microsecond),
+      autoRenewing: true,
+      priceCurrencyCode: :USD,
+      priceAmount: 1.99,
+      countryCode: :US,
+      developerPayload: "",
+      paymentState: :received,
+      cancelReason: :system,
+      userCancellationTime: nil
+    }
+
     response = %{
       "kind" => "androidpublisher#subscriptionPurchase",
-      "startTimeMillis" => 12345,
-      "expiryTimeMillis" => 12345,
+      "startTimeMillis" => 1490964684,
+      "expiryTimeMillis" => 1490964684,
       "autoRenewing" => true,
       "priceCurrencyCode" => "USD",
       "priceAmountMicros" => 1990000,
@@ -36,12 +49,7 @@ defmodule GoogleIAPTest do
       ])
     expect(:hackney, :body, 1, {:ok, Poison.encode!(response)})
 
-    assert GoogleIAP.get_subscription("p_1", "s_1", "t_1") ==
-      {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: response
-        }
-      }
+    assert {:ok, subscription} == GoogleIAP.get_subscription("p_1", "s_1", "t_1")
 
     assert validate :hackney
   end
@@ -58,12 +66,7 @@ defmodule GoogleIAPTest do
       ])
     expect(:hackney, :body, 1, {:ok, ""})
 
-    assert GoogleIAP.cancel_subscription("p_1", "s_1", "t_1") ==
-      {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: ""
-        }
-      }
+    assert :ok == GoogleIAP.cancel_subscription("p_1", "s_1", "t_1")
 
     assert validate :hackney
   end
@@ -83,8 +86,10 @@ defmodule GoogleIAPTest do
       }
     }
 
+    new_expiry_time = DateTime.from_unix!(1490964684)
+
     response = %{
-      "newExpiryTimeMillis" => 54321
+      "newExpiryTimeMillis" => 1490964684
     }
 
     expect(
@@ -98,12 +103,7 @@ defmodule GoogleIAPTest do
       ])
     expect(:hackney, :body, 1, {:ok, Poison.encode!(response)})
 
-    assert GoogleIAP.defer_subscription("p_1", "s_1", "t_1", expected_date, desired_date) ==
-      {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: response
-        }
-      }
+    assert {:ok, new_expiry_time} == GoogleIAP.defer_subscription("p_1", "s_1", "t_1", expected_date, desired_date)
 
     assert validate :hackney
   end
@@ -120,12 +120,7 @@ defmodule GoogleIAPTest do
       ])
     expect(:hackney, :body, 1, {:ok, ""})
 
-    assert GoogleIAP.refund_subscription("p_1", "s_1", "t_1") ==
-      {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: ""
-        }
-      }
+    assert :ok == GoogleIAP.refund_subscription("p_1", "s_1", "t_1")
 
     assert validate :hackney
   end
@@ -142,12 +137,7 @@ defmodule GoogleIAPTest do
       ])
     expect(:hackney, :body, 1, {:ok, ""})
 
-    assert GoogleIAP.revoke_subscription("p_1", "s_1", "t_1") ==
-      {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: ""
-        }
-      }
+    assert :ok == GoogleIAP.revoke_subscription("p_1", "s_1", "t_1")
 
     assert validate :hackney
   end
